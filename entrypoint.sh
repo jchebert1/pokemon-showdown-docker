@@ -6,6 +6,9 @@
 #   usergroups.csv   admin/mod ranks, e.g. "yourname,~"
 #   logs/            chat logs, modlogs, etc.
 #   databases/       sqlite files (*.db) — repo migrations/schemas are merged in non-destructively
+#
+# Optional env vars (handy when deploying from Portainer with no shell):
+#   PS_ADMIN         comma-separated registered usernames to grant admin (~)
 set -eu
 
 DATA=/data
@@ -22,6 +25,15 @@ ln -sfn "$DATA/config.js" "$APP/config/config.js"
 
 # --- usergroups.csv (admin list) -------------------------------------------
 [ -f "$DATA/usergroups.csv" ] || : > "$DATA/usergroups.csv"
+if [ -n "${PS_ADMIN:-}" ]; then
+  old_ifs=$IFS; IFS=','
+  for name in $PS_ADMIN; do
+    id=$(printf '%s' "$name" | tr -d ' ' | tr '[:upper:]' '[:lower:]' | tr -cd 'a-z0-9')
+    [ -n "$id" ] || continue
+    grep -qi "^$id," "$DATA/usergroups.csv" || { echo "[entrypoint] Granting admin (~) to $id"; echo "$id,~" >> "$DATA/usergroups.csv"; }
+  done
+  IFS=$old_ifs
+fi
 ln -sfn "$DATA/usergroups.csv" "$APP/config/usergroups.csv"
 
 # --- logs / databases ------------------------------------------------------
