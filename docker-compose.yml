@@ -1,0 +1,24 @@
+services:
+  showdown:
+    build:
+      context: .
+      args:
+        # Point at your fork, or leave as upstream. Any git ref works (branch, tag, commit).
+        PS_REPO: https://github.com/smogon/pokemon-showdown.git
+        PS_REF: master
+        NODE_VERSION: "22"
+    image: pokemon-showdown:local
+    container_name: pokemon-showdown
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data:/data
+    # Pi-friendly memory ceiling; the server + subprocesses sit well under this for a friend group.
+    mem_limit: 1g
+    healthcheck:
+      test: ["CMD-SHELL", "node -e \"require('http').get('http://127.0.0.1:8000/',r=>process.exit(r.statusCode<500?0:1)).on('error',()=>process.exit(1))\""]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
