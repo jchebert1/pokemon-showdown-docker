@@ -12,8 +12,12 @@ services:
     restart: unless-stopped
     ports:
       - "8000:8000"
+    environment:
+      # Registered Pokémon Showdown username(s) to grant admin (~). Comma-separated for several.
+      PS_ADMIN: ""
     volumes:
-      - ./data:/data
+      # Named volume (not a bind mount) so it works from Portainer and gets correct ownership.
+      - showdown_data:/data
     # Pi-friendly memory ceiling; the server + subprocesses sit well under this for a friend group.
     mem_limit: 1g
     healthcheck:
@@ -22,3 +26,6 @@ services:
       timeout: 5s
       retries: 3
       start_period: 30s
+
+volumes:
+  showdown_data:
