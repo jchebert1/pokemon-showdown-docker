@@ -4,8 +4,8 @@ services:
       context: .
       args:
         # Point at your fork, or leave as upstream. Any git ref works (branch, tag, commit).
-        PS_REPO: https://github.com/smogon/pokemon-showdown.git
-        PS_REF: master
+        PS_REPO: ${PS_REPO:-https://github.com/smogon/pokemon-showdown.git}
+        PS_REF: ${PS_REF:-master}
         NODE_VERSION: "22"
     image: pokemon-showdown:local
     # Rebuild on every (re)deploy — required for Portainer to pick up Dockerfile/upstream changes.
@@ -16,7 +16,8 @@ services:
       - "8000:8000"
     environment:
       # Registered Pokémon Showdown username(s) to grant admin (~). Comma-separated for several.
-      PS_ADMIN: ""
+      # Set PS_ADMIN as a stack environment variable in Portainer (or in a .env file).
+      PS_ADMIN: ${PS_ADMIN:-}
     volumes:
       # Named volume (not a bind mount) so it works from Portainer and gets correct ownership.
       - showdown_data:/data
