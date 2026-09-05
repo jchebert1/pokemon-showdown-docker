@@ -40,8 +40,14 @@ WORKDIR /app
 
 COPY --from=build --chown=node:node /app /app
 COPY --chown=node:node entrypoint.sh /entrypoint.sh
+# Persistent state lives in /data. Wire the symlinks here (as root) so the non-root
+# runtime user never needs to modify /app itself; the entrypoint only seeds /data.
 RUN chmod +x /entrypoint.sh \
- && mkdir -p /data && chown node:node /data
+ && mkdir -p /data && chown node:node /data /app \
+ && mv /app/logs /app/.skel-logs && mv /app/databases /app/.skel-databases \
+ && ln -s /data/logs /app/logs && ln -s /data/databases /app/databases \
+ && ln -s /data/config.js /app/config/config.js \
+ && ln -s /data/usergroups.csv /app/config/usergroups.csv
 
 USER node
 VOLUME ["/data"]
