@@ -8,6 +8,8 @@ services:
         PS_REF: master
         NODE_VERSION: "22"
     image: pokemon-showdown:local
+    # Rebuild on every (re)deploy — required for Portainer to pick up Dockerfile/upstream changes.
+    pull_policy: build
     container_name: pokemon-showdown
     restart: unless-stopped
     ports:
